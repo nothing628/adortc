@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>
+      @section('title')
+      Judul
+      @endsection
+    </title>
+    {{ style('css/bootstrap.min.css') }}
+    {{ style('css/app.css') }}
+    {{ style('css/test.css') }}
+  </head>
+  <body>
+    @include('layouts.navbar')
+
+    <main class="container">
+      @!section('content')
+    </main>
+  </body>
+  {{ script('js/jquery-3.3.1.min.js') }}
+  {{ script('js/bootstrap.bundle.min.js') }}
+  {{ script('js/app.js') }}
+</html>

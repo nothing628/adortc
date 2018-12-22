@@ -44,7 +44,8 @@
     "mysql": "^2.16.0",
     "popper.js": "^1.14.6",
     "react": "^16.6.3",
-    "react-dom": "^16.6.3"
+    "react-dom": "^16.6.3",
+    "react-habitat": "^1.0.1"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.0.0",
