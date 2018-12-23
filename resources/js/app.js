@@ -13,8 +13,8 @@ require('./bootstrap');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-import ReactHabitat                 from 'react-habitat';
-import SomeReactComponent           from './components/Example';
+import ReactHabitat from 'react-habitat';
+import Room from './components/Room';
 
 class MyApp extends ReactHabitat.Bootstrapper {
   constructor(){
@@ -24,7 +24,7 @@ class MyApp extends ReactHabitat.Bootstrapper {
     const builder = new ReactHabitat.ContainerBuilder();
 
     // Register a component:
-    builder.register(SomeReactComponent).as('Example');
+    builder.register(Room).as('Room');
 
     // Finally, set the container:
     this.setContainer(builder.build());
