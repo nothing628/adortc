@@ -27,7 +27,7 @@ export default class RoomRow extends Component {
         <td>{this.props.item.room_name}</td>
         <td>
           <button className="btn btn-danger" onClick={this.removeRoom}>Remove</button>
-          <button className="btn btn-primary" onClick={this.joinRoom} style={joinStyle}>Join</button>
+          <a className="btn btn-primary" style={joinStyle} href={this.props.item.joinurl}>Join</a>
         </td>
       </tr>
     );

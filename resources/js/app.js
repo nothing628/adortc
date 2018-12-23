@@ -15,6 +15,7 @@ require('./bootstrap');
 
 import ReactHabitat from 'react-habitat';
 import Room from './components/Room';
+import Chat from './components/Chat/App';
 
 class MyApp extends ReactHabitat.Bootstrapper {
   constructor(){
@@ -25,6 +26,7 @@ class MyApp extends ReactHabitat.Bootstrapper {
 
     // Register a component:
     builder.register(Room).as('Room');
+    builder.register(Chat).as('Chat');
 
     // Finally, set the container:
     this.setContainer(builder.build());
