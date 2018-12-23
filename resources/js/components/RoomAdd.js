@@ -27,15 +27,18 @@ export default class RoomAdd extends Component {
 
   render() {
     return (
-      <div className="form">
-        <button onClick={this.addRoom} className="btn">Add Room</button>
-        <input
-          type="text"
-          className="form-control"
-          ref={this.inp}
-          value={this.state.roomNumber}
-          onChange={this.inputChange}></input>
-      </div>
+      <form className="form-inline">
+        <div className="form-group mx-sm-3 mb-2">
+          <label className="sr-only">Room Name</label>
+          <input
+            type="text"
+            className="form-control"
+            ref={this.inp}
+            value={this.state.roomNumber}
+            onChange={this.inputChange}></input>
+        </div>
+        <button type="button" onClick={this.addRoom} className="btn btn-primary mb-2">Add Room</button>
+      </form>
     )
   }
 }

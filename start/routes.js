@@ -18,3 +18,6 @@ const Route = use('Route')
 
 Route.on('/').render('welcome')
 Route.get('/room', 'RtcController.index')
+Route.get('/api/room', 'RtcController.listRoom').as('api.room.list')
+Route.post('/api/room', 'RtcController.addRoom').as('api.room.add')
+Route.delete('/api/room/:id', 'RtcController.deleteRoom').as('api.room.delete')
