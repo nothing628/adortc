@@ -1,6 +1,9 @@
 module.exports = {
   mode: 'development',
-  entry: __dirname + '/resources/js/app.js',
+  entry: [
+    'babel-regenerator-runtime',
+    __dirname + '/resources/js/app.js'
+  ],
   output: {
     path: __dirname + '/public/js',
     publicPath: '/public/',
