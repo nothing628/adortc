@@ -9,6 +9,13 @@ export default class ChatApp extends Component {
     this.localChannel = null;
     this.localStream = null;
     this.localVideo = React.createRef();
+    this.localSdp = '';
+
+    this.remotePeerConnection = null;
+    this.remoteChannel = null;
+    this.remoteStream = null;
+    this.remoteVideo = React.createRef();
+    this.remoteSdp = '';
   }
 
   componentDidMount() {
@@ -34,6 +41,10 @@ export default class ChatApp extends Component {
       this.localVideo.current.srcObject = userMedia;
       this.localStream = userMedia;
       this.createPeer();
+      await this.createOffer();
+      await this.setOffer();
+      await this.createAnswer();
+      await this.setAnswer();
     } catch (e) {
       console.log('navigator.getUserMedia error: ', e);
     }
@@ -56,15 +67,114 @@ export default class ChatApp extends Component {
 
     this.localPeerConnection = new RTCPeerConnection(servers);
     console.log('Created local peer connection object localPeerConnection');
-    this.localPeerConnection.onicecandidate = e => onIceCandidate(this.localPeerConnection, e);
+    this.localPeerConnection.onicecandidate = this.onIceCandidateLocal;
     this.localChannel = this.localPeerConnection.createDataChannel('sendDataChannel', {ordered: true});
     this.localChannel.onopen = this.onSendChannelStateChange;
     this.localChannel.onclose = this.onSendChannelStateChange;
     this.localChannel.onerror = this.onSendChannelStateChange;
 
+    this.remotePeerConnection = new RTCPeerConnection(servers);
+    console.log('Created remote peer connection object remotePeerConnection');
+    this.remotePeerConnection.onicecandidate = this.onIceCandidateRemote;
+    this.remotePeerConnection.ontrack = this.onGotRemoteStream;
+    this.remotePeerConnection.ondatachannel = this.onReceiveChannel;
+
     this.localStream.getTracks()
       .forEach(track => this.localPeerConnection.addTrack(track, this.localStream));
     console.log('Adding Local Stream to peer connection');
+  }
+
+  createOffer = async () => {
+    try {
+      const offerOptions = {
+        offerToReceiveAudio: 1,
+        offerToReceiveVideo: 1
+      };
+      const offer = await this.localPeerConnection.createOffer(offerOptions);
+
+      this.localSdp = offer.sdp;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  setOffer = async () => {
+    const sdp = this.localSdp;
+    const offer = {
+      type: 'offer',
+      sdp: sdp
+    };
+    console.log(`Modified Offer from localPeerConnection\n${sdp}`);
+
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const ignore = await this.localPeerConnection.setLocalDescription(offer);
+      console.log("Set session description success.");
+    } catch (e) {
+      console.log(e);
+    }
+
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const ignore = await this.remotePeerConnection.setRemoteDescription(offer);
+      console.log("Set session description success.");
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  createAnswer = async () => {
+    // Since the 'remote' side has no media stream we need
+    // to pass in the right constraints in order for it to
+    // accept the incoming offer of audio and video.
+    try {
+      const answer = await this.remotePeerConnection.createAnswer();
+
+      this.remoteSdp = answer.sdp;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  setAnswer = async () => {
+    const sdp = this.remoteSdp;
+    const answer = {
+      type: 'answer',
+      sdp: sdp
+    };
+
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const ignore = await this.remotePeerConnection.setLocalDescription(answer);
+      console.log("Set session description success.");
+    } catch (e) {
+      console.log(e);
+    }
+
+    console.log(`Modified Answer from remotePeerConnection\n${sdp}`);
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const ignore = await this.localPeerConnection.setRemoteDescription(answer);
+      console.log("Set session description success.");
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  hangup = () => {
+    this.remoteVideo.srcObject = null;
+    console.log('Ending call');
+    this.localStream.getTracks().forEach(track => track.stop());
+    this.localChannel.close();
+
+    if (this.remoteChannel) {
+      this.remoteChannel.close();
+    }
+
+    this.localPeerConnection.close();
+    this.localPeerConnection = null;
+    this.remotePeerConnection.close();
+    this.remotePeerConnection = null;
   }
 
   onSendChannelStateChange = () => {
@@ -75,6 +185,47 @@ export default class ChatApp extends Component {
     } else {
       clearInterval(this.sendDataLoop);
     }
+  }
+
+  onIceCandidateRemote = async(event) => {
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const ignore = await this.localPeerConnection.addIceCandidate(event.candidate);
+      console.log('AddIceCandidate remote success.');
+    } catch (e) {
+      console.log(e);
+    }
+
+    console.log(`remote ICE candidate:\n${event.candidate ? event.candidate.candidate : '(null)'}`);
+  }
+
+  onIceCandidateLocal = async (event) => {
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const ignore = await this.remotePeerConnection.addIceCandidate(event.candidate);
+      console.log('AddIceCandidate local success.');
+    } catch (e) {
+      console.log(e);
+    }
+
+    console.log(`local ICE candidate:\n${event.candidate ? event.candidate.candidate : '(null)'}`);
+  }
+
+  onGotRemoteStream = (e) => {
+    const remoteVideo = this.remoteVideo.current;
+
+    if (remoteVideo.srcObject !== e.streams[0]) {
+      remoteVideo.srcObject = e.streams[0];
+      console.log('Received remote stream');
+    }
+  }
+
+  onReceiveChannel = (event) => {
+    console.log('Receive Channel Callback');
+    this.receiveChannel = event.channel;
+    this.receiveChannel.onmessage = (event) => {};
+    this.receiveChannel.onopen = () => {};
+    this.receiveChannel.onclose = () => {};
   }
 
   sendData = () => {
@@ -93,7 +244,7 @@ export default class ChatApp extends Component {
           <video ref={this.localVideo} width={320} height={240} autoPlay></video>
         </div>
         <div className="col-sm">
-          remote
+          <video ref={this.remoteVideo} width={320} height={240} autoPlay></video>
         </div>
       </div>
     )
