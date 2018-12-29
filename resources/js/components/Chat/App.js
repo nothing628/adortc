@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import adapter from 'webrtc-adapter';
+import Ws from '@adonisjs/websocket-client'
 
 export default class ChatApp extends Component {
   constructor(props) {
@@ -19,7 +20,30 @@ export default class ChatApp extends Component {
   }
 
   componentDidMount() {
+    this.testWS()
     this.getMedia();
+  }
+
+  wsGetOffer = (data) => {
+    // if we receive some offer
+    // we need send back the answer over websocket
+    console.log(data);
+  }
+
+  testWS = () => {
+    const host = location.host;
+    const fullpath = 'ws://' + host;
+    const ws = Ws(fullpath);
+    ws.connect();
+
+    this.rtc = ws.subscribe('rtc')
+
+    this.rtc.on('get-offer', this.wsGetOffer);
+    this.rtc.on('message', function incoming(data) {
+      console.log(data);
+    });
+
+    this.rtc.emit('test');
   }
 
   getMedia = async () => {
@@ -46,27 +70,14 @@ export default class ChatApp extends Component {
       await this.createAnswer();
       await this.setAnswer();
     } catch (e) {
-      console.log('navigator.getUserMedia error: ', e);
+      console.log(e);
     }
   }
 
   createPeer = () => {
-    console.log('Starting call');
-    // const videoTracks = this.localStream.getVideoTracks();
-    // const audioTracks = this.localStream.getAudioTracks();
-
-    // if (videoTracks.length > 0) {
-    //   console.log(`Using video device: ${videoTracks[0].label}`);
-    // }
-
-    // if (audioTracks.length > 0) {
-    //   console.log(`Using audio device: ${audioTracks[0].label}`);
-    // }
-    
     const servers = null;
 
     this.localPeerConnection = new RTCPeerConnection(servers);
-    console.log('Created local peer connection object localPeerConnection');
     this.localPeerConnection.onicecandidate = this.onIceCandidateLocal;
     this.localChannel = this.localPeerConnection.createDataChannel('sendDataChannel', {ordered: true});
     this.localChannel.onopen = this.onSendChannelStateChange;
@@ -74,14 +85,12 @@ export default class ChatApp extends Component {
     this.localChannel.onerror = this.onSendChannelStateChange;
 
     this.remotePeerConnection = new RTCPeerConnection(servers);
-    console.log('Created remote peer connection object remotePeerConnection');
     this.remotePeerConnection.onicecandidate = this.onIceCandidateRemote;
     this.remotePeerConnection.ontrack = this.onGotRemoteStream;
     this.remotePeerConnection.ondatachannel = this.onReceiveChannel;
 
     this.localStream.getTracks()
       .forEach(track => this.localPeerConnection.addTrack(track, this.localStream));
-    console.log('Adding Local Stream to peer connection');
   }
 
   createOffer = async () => {
@@ -104,12 +113,10 @@ export default class ChatApp extends Component {
       type: 'offer',
       sdp: sdp
     };
-    console.log(`Modified Offer from localPeerConnection\n${sdp}`);
 
     try {
       // eslint-disable-next-line no-unused-vars
       const ignore = await this.localPeerConnection.setLocalDescription(offer);
-      console.log("Set session description success.");
     } catch (e) {
       console.log(e);
     }
@@ -117,7 +124,6 @@ export default class ChatApp extends Component {
     try {
       // eslint-disable-next-line no-unused-vars
       const ignore = await this.remotePeerConnection.setRemoteDescription(offer);
-      console.log("Set session description success.");
     } catch (e) {
       console.log(e);
     }
@@ -146,24 +152,20 @@ export default class ChatApp extends Component {
     try {
       // eslint-disable-next-line no-unused-vars
       const ignore = await this.remotePeerConnection.setLocalDescription(answer);
-      console.log("Set session description success.");
     } catch (e) {
       console.log(e);
     }
 
-    console.log(`Modified Answer from remotePeerConnection\n${sdp}`);
     try {
       // eslint-disable-next-line no-unused-vars
       const ignore = await this.localPeerConnection.setRemoteDescription(answer);
-      console.log("Set session description success.");
     } catch (e) {
       console.log(e);
     }
   }
 
   hangup = () => {
-    this.remoteVideo.srcObject = null;
-    console.log('Ending call');
+    this.remoteVideo.current.srcObject = null;
     this.localStream.getTracks().forEach(track => track.stop());
     this.localChannel.close();
 
@@ -179,7 +181,6 @@ export default class ChatApp extends Component {
 
   onSendChannelStateChange = () => {
     const readyState = this.localChannel.readyState;
-    console.log(`Send channel state is: ${readyState}`);
     if (readyState === 'open') {
       this.sendDataLoop = setInterval(this.sendData, 1000);
     } else {
@@ -191,24 +192,18 @@ export default class ChatApp extends Component {
     try {
       // eslint-disable-next-line no-unused-vars
       const ignore = await this.localPeerConnection.addIceCandidate(event.candidate);
-      console.log('AddIceCandidate remote success.');
     } catch (e) {
       console.log(e);
     }
-
-    console.log(`remote ICE candidate:\n${event.candidate ? event.candidate.candidate : '(null)'}`);
   }
 
   onIceCandidateLocal = async (event) => {
     try {
       // eslint-disable-next-line no-unused-vars
       const ignore = await this.remotePeerConnection.addIceCandidate(event.candidate);
-      console.log('AddIceCandidate local success.');
     } catch (e) {
       console.log(e);
     }
-
-    console.log(`local ICE candidate:\n${event.candidate ? event.candidate.candidate : '(null)'}`);
   }
 
   onGotRemoteStream = (e) => {
@@ -216,12 +211,10 @@ export default class ChatApp extends Component {
 
     if (remoteVideo.srcObject !== e.streams[0]) {
       remoteVideo.srcObject = e.streams[0];
-      console.log('Received remote stream');
     }
   }
 
   onReceiveChannel = (event) => {
-    console.log('Receive Channel Callback');
     this.receiveChannel = event.channel;
     this.receiveChannel.onmessage = (event) => {};
     this.receiveChannel.onopen = () => {};

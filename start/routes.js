@@ -16,7 +16,7 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.on('/').render('welcome')
+Route.on('/').render('welcome').as('home')
 Route.get('/room', 'RtcController.index').as('room.list')
 Route.get('/room/:id', 'JoinController.index').as('room.join')
 Route.get('/api/room', 'RtcController.listRoom').as('api.room.list')
