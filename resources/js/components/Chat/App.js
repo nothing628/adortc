@@ -17,8 +17,16 @@ export default class ChatApp extends Component {
     this.remoteVideo = React.createRef();
 
     this.rtc = null;
+    this.rtc_offers = [];
+    this.rtc_ice = [];
+    this.is_get_offer = false;
+    this.is_get_answer = false;
     this.heartbeat_id = null;
     this.clientId = this.createRandomId();
+
+    this.state = {
+      client_id: this.clientId
+    };
   }
 
   createRandomId() {
@@ -34,14 +42,52 @@ export default class ChatApp extends Component {
     clearInterval(this.heartbeat_id);
   }
 
+  wsGetAnswer = (data) => {
+    if (data.length == 1 && !this.is_get_answer) {
+      const first = data[0];
+      const sdp = first.sdp;
+      const answer = {
+        type: 'answer',
+        sdp
+      };
+
+      this.is_get_answer = true;
+      this.localPeerConnection.setRemoteDescription(answer);
+      //ready for communicate
+      console.log('answer', answer);
+    }
+  }
+
   wsGetOffer = (data) => {
     // if we receive some offer
     // we need send back the answer over websocket
-    console.log(data);
+
+    if (data.length == 1 && !this.is_get_offer) {
+      const first = data[0];
+      const sdp = first.sdp;
+      const offer = {
+        type: 'offer',
+        sdp: sdp
+      };
+
+      this.is_get_offer = true;
+      this.remotePeerConnection.setRemoteDescription(offer);
+      this.setAnswer()
+      //get offer
+      console.log('offer', offer);
+    }
   }
 
   wsGetICE = (data) => {
-    console.log(data);
+    if (data.length > 0) {
+      const ice_for_local = data.filter(value => value.type == 'ice_loc');
+      const ice_for_remote = data.filter(value => value.type == 'ice_rem');
+
+      this.setIceLocal(ice_for_local);
+      this.setIceRemote(ice_for_remote);
+      console.log('ice_remote', ice_for_remote);
+      console.log('ice_local', ice_for_local);
+    }
   }
 
   getWS = () => {
@@ -52,8 +98,9 @@ export default class ChatApp extends Component {
 
     this.rtc = ws.subscribe('rtc')
 
-    this.rtc.on('getoffer', this.wsGetOffer);
-    this.rtc.on('getice', this.wsGetICE);
+    this.rtc.on('getanswer', this.wsGetAnswer);
+    this.rtc.on('getoffer',  this.wsGetOffer);
+    this.rtc.on('getice',    this.wsGetICE);
     this.rtc.on('error', (data) => {
       console.log(data);
     });
@@ -136,28 +183,41 @@ export default class ChatApp extends Component {
       // eslint-disable-next-line no-unused-vars
       const ignore = await this.localPeerConnection.setLocalDescription(offer);
 
-      this.sendOffer(offer);
+      this.sendSocket(offer, 'offer');
     } catch (e) {
       console.log(e);
     }
   }
 
-  sendOffer = (offer) => {
-    const offer_data = Object.assign({}, offer);
-
-    offer_data.client_id = this.clientId;
-    offer_data.room_id = this.props.roomId;
-
-    this.rtc.emit('offer', offer_data);
+  setIceLocal = async (data) => {
+    data.forEach(item => {
+      //await this.localPeerConnection.addIceCandidate(event.candidate);
+    })
   }
 
-  sendIceCandidate = (candidate) => {
+  setIceRemote = async (data) => {
+    data.forEach(item => {
+      //await this.remotePeerConnection.addIceCandidate();
+    })
+  }
+
+  sendSocket = (data, event) => {
+    const data_copy = Object.assign({}, data);
+
+    data_copy.client_id = this.clientId;
+    data_copy.room_id = this.props.roomId;
+
+    this.rtc.emit(event, data_copy);
+  }
+
+  sendIceCandidate = (candidate, tipe) => {
     const client_id = this.clientId;
     const room_id = this.props.roomId;
     const data = {
       client_id,
       room_id,
-      candidate
+      candidate,
+      tipe
     };
 
     this.rtc.emit('icecandidate', data);
@@ -186,13 +246,8 @@ export default class ChatApp extends Component {
     try {
       // eslint-disable-next-line no-unused-vars
       const ignore = await this.remotePeerConnection.setLocalDescription(answer);
-    } catch (e) {
-      console.log(e);
-    }
 
-    try {
-      // eslint-disable-next-line no-unused-vars
-      const ignore = await this.localPeerConnection.setRemoteDescription(answer);
+      this.sendSocket(answer, 'answer');
     } catch (e) {
       console.log(e);
     }
@@ -224,8 +279,9 @@ export default class ChatApp extends Component {
 
   onIceCandidateRemote = async(event) => {
     try {
-      // eslint-disable-next-line no-unused-vars
-      const ignore = await this.localPeerConnection.addIceCandidate(event.candidate);
+      if (event.candidate !== null) {
+        this.sendIceCandidate(event.candidate.toJSON(), 'ice_loc');
+      }
     } catch (e) {
       console.log(e);
     }
@@ -233,10 +289,8 @@ export default class ChatApp extends Component {
 
   onIceCandidateLocal = async (event) => {
     try {
-      // eslint-disable-next-line no-unused-vars
-      //TODO: send ice candidate over rtc
       if (event.candidate !== null) {
-        this.sendIceCandidate(event.candidate.toJSON());
+        this.sendIceCandidate(event.candidate.toJSON(), 'ice_rem');
       }
     } catch (e) {
       console.log(e);
@@ -272,6 +326,7 @@ export default class ChatApp extends Component {
       <div className="row">
         <div className="col-sm">
           <video ref={this.localVideo} width={320} height={240} autoPlay controls></video>
+          <p>{this.state.client_id}</p>
           <button className="btn btn-primary">Call</button>
         </div>
         <div className="col-sm">
