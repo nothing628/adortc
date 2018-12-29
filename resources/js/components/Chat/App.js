@@ -10,17 +10,23 @@ export default class ChatApp extends Component {
     this.localChannel = null;
     this.localStream = null;
     this.localVideo = React.createRef();
-    this.localSdp = '';
 
     this.remotePeerConnection = null;
     this.remoteChannel = null;
     this.remoteStream = null;
     this.remoteVideo = React.createRef();
-    this.remoteSdp = '';
+
+    this.rtc = null;
+    this.heartbeat_id = null;
+    this.clientId = this.createRandomId();
+  }
+
+  createRandomId() {
+    return Math.ceil(Math.random() * 100000000);
   }
 
   componentDidMount() {
-    this.testWS()
+    this.getWS()
     this.getMedia();
   }
 
@@ -30,7 +36,7 @@ export default class ChatApp extends Component {
     console.log(data);
   }
 
-  testWS = () => {
+  getWS = () => {
     const host = location.host;
     const fullpath = 'ws://' + host;
     const ws = Ws(fullpath);
@@ -38,12 +44,21 @@ export default class ChatApp extends Component {
 
     this.rtc = ws.subscribe('rtc')
 
-    this.rtc.on('get-offer', this.wsGetOffer);
-    this.rtc.on('message', function incoming(data) {
+    this.rtc.on('getoffer', this.wsGetOffer);
+    this.rtc.on('message', (data) => {
+      console.log(data);
+    });
+    this.rtc.on('error', (data) => {
       console.log(data);
     });
 
     this.rtc.emit('test');
+
+    this.heartbeat_id = setInterval(() => {
+      const client_id = this.clientId;
+      const data = { client_id };
+      this.rtc.emit('heartbeat', data);
+    }, 2000);
   }
 
   getMedia = async () => {
@@ -54,7 +69,7 @@ export default class ChatApp extends Component {
     }
 
     const constraints = {
-      audio: true,
+      audio: false,
       video: true
     };
     
@@ -65,10 +80,7 @@ export default class ChatApp extends Component {
       this.localVideo.current.srcObject = userMedia;
       this.localStream = userMedia;
       this.createPeer();
-      await this.createOffer();
       await this.setOffer();
-      await this.createAnswer();
-      await this.setAnswer();
     } catch (e) {
       console.log(e);
     }
@@ -96,19 +108,19 @@ export default class ChatApp extends Component {
   createOffer = async () => {
     try {
       const offerOptions = {
-        offerToReceiveAudio: 1,
+        offerToReceiveAudio: 0,
         offerToReceiveVideo: 1
       };
       const offer = await this.localPeerConnection.createOffer(offerOptions);
 
-      this.localSdp = offer.sdp;
+      return offer.sdp;
     } catch (e) {
-      console.log(e);
+      throw e;
     }
   }
 
   setOffer = async () => {
-    const sdp = this.localSdp;
+    const sdp = await this.createOffer();
     const offer = {
       type: 'offer',
       sdp: sdp
@@ -117,16 +129,32 @@ export default class ChatApp extends Component {
     try {
       // eslint-disable-next-line no-unused-vars
       const ignore = await this.localPeerConnection.setLocalDescription(offer);
-    } catch (e) {
-      console.log(e);
-    }
 
-    try {
-      // eslint-disable-next-line no-unused-vars
-      const ignore = await this.remotePeerConnection.setRemoteDescription(offer);
+      this.sendOffer(offer);
     } catch (e) {
       console.log(e);
     }
+  }
+
+  sendOffer = (offer) => {
+    const offer_data = Object.assign({}, offer);
+
+    offer_data.client_id = this.clientId;
+    offer_data.room_id = this.props.roomId;
+
+    this.rtc.emit('offer', offer_data);
+  }
+
+  sendIceCandidate = (candidate) => {
+    const client_id = this.clientId;
+    const room_id = this.props.roomId;
+    const data = {
+      client_id,
+      room_id,
+      candidate
+    };
+
+    this.rtc.emit('icecandidate', data);
   }
 
   createAnswer = async () => {
@@ -136,14 +164,14 @@ export default class ChatApp extends Component {
     try {
       const answer = await this.remotePeerConnection.createAnswer();
 
-      this.remoteSdp = answer.sdp;
+      return answer.sdp;
     } catch (e) {
-      console.log(e);
+      throw e;
     }
   }
 
   setAnswer = async () => {
-    const sdp = this.remoteSdp;
+    const sdp = await this.createAnswer();
     const answer = {
       type: 'answer',
       sdp: sdp
@@ -200,7 +228,10 @@ export default class ChatApp extends Component {
   onIceCandidateLocal = async (event) => {
     try {
       // eslint-disable-next-line no-unused-vars
-      const ignore = await this.remotePeerConnection.addIceCandidate(event.candidate);
+      //TODO: send ice candidate over rtc
+      if (event.candidate !== null) {
+        this.sendIceCandidate(event.candidate.toJSON());
+      }
     } catch (e) {
       console.log(e);
     }
@@ -234,12 +265,13 @@ export default class ChatApp extends Component {
     return (
       <div className="row">
         <div className="col-sm">
-          <video ref={this.localVideo} width={320} height={240} autoPlay></video>
+          <video ref={this.localVideo} width={320} height={240} autoPlay controls></video>
+          <button className="btn btn-primary">Call</button>
         </div>
         <div className="col-sm">
-          <video ref={this.remoteVideo} width={320} height={240} autoPlay></video>
+          <video ref={this.remoteVideo} width={320} height={240} autoPlay controls></video>
         </div>
       </div>
-    )
+    );
   }
 }
