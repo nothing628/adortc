@@ -22,7 +22,7 @@ export default class ChatApp extends Component {
   }
 
   createRandomId() {
-    return Math.ceil(Math.random() * 100000000);
+    return Math.ceil(Math.random() * 100000000).toString();
   }
 
   componentDidMount() {
@@ -30,9 +30,17 @@ export default class ChatApp extends Component {
     this.getMedia();
   }
 
+  componentWillUnmount() {
+    clearInterval(this.heartbeat_id);
+  }
+
   wsGetOffer = (data) => {
     // if we receive some offer
     // we need send back the answer over websocket
+    console.log(data);
+  }
+
+  wsGetICE = (data) => {
     console.log(data);
   }
 
@@ -45,18 +53,16 @@ export default class ChatApp extends Component {
     this.rtc = ws.subscribe('rtc')
 
     this.rtc.on('getoffer', this.wsGetOffer);
-    this.rtc.on('message', (data) => {
-      console.log(data);
-    });
+    this.rtc.on('getice', this.wsGetICE);
     this.rtc.on('error', (data) => {
       console.log(data);
     });
 
-    this.rtc.emit('test');
-
     this.heartbeat_id = setInterval(() => {
       const client_id = this.clientId;
-      const data = { client_id };
+      const room_id = this.props.roomId;
+      const data = { client_id, room_id };
+
       this.rtc.emit('heartbeat', data);
     }, 2000);
   }
