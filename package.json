@@ -11,7 +11,8 @@
     "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "watch": "npm run development -- --watch",
     "watch-poll": "npm run watch -- --watch-poll",
-    "pack": "cross-env NODE_ENV=development webpack --progress --watch",
+    "pack":     "cross-env NODE_ENV=development webpack --progress --config=webpack.config.dev.js --watch",
+    "packprod": "cross-env NODE_ENV=production webpack --progress --config=webpack.config.prod.js",
     "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
     "prod": "npm run production",
     "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
@@ -49,6 +50,7 @@
     "laravel-mix": "^4.0.8",
     "lodash": "^4.17.11",
     "mysql": "^2.16.0",
+    "pem": "^1.13.2",
     "popper.js": "^1.14.6",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
