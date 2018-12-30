@@ -141,7 +141,16 @@ export default class ChatApp extends Component {
   }
 
   createPeer = () => {
-    const servers = null;
+    const servers = {
+      iceServers: [
+        {
+          urls: "turn:128.199.238.145",  // A TURN server
+          username: "titanrtc",
+          credential: "titanrtc",
+          credentialType: "password"
+        }
+      ]
+    };
 
     this.localPeerConnection = new RTCPeerConnection(servers);
     this.localPeerConnection.onicecandidate = this.onIceCandidateLocal;
