@@ -123,7 +123,7 @@ export default class ChatApp extends Component {
     }
 
     const constraints = {
-      audio: false,
+      audio: true,
       video: true
     };
     
@@ -171,7 +171,7 @@ export default class ChatApp extends Component {
   createOffer = async () => {
     try {
       const offerOptions = {
-        offerToReceiveAudio: 0,
+        offerToReceiveAudio: 1,
         offerToReceiveVideo: 1
       };
       const offer = await this.localPeerConnection.createOffer(offerOptions);
