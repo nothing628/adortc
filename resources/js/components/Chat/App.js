@@ -371,15 +371,17 @@ export default class ChatApp extends Component {
   }
 
   render() {
+    let styles = {
+      width: '100%'
+    };
+
     return (
       <div className="row">
-        <div className="col-sm">
-          <video ref={this.localVideo} width={320} height={240} autoPlay controls muted></video>
-          <p>{this.state.client_id}</p>
-          <button className="btn btn-primary">Call</button>
+        <div className="col-md-6">
+          <video ref={this.localVideo} style={styles} width={640} height={480} autoPlay controls muted></video>
         </div>
-        <div className="col-sm">
-          <video ref={this.remoteVideo} width={320} height={240} autoPlay controls></video>
+        <div className="col-md-6">
+          <video ref={this.remoteVideo} style={styles} width={640} height={480} autoPlay controls></video>
         </div>
       </div>
     );
