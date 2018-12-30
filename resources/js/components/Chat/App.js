@@ -374,7 +374,7 @@ export default class ChatApp extends Component {
     return (
       <div className="row">
         <div className="col-sm">
-          <video ref={this.localVideo} width={320} height={240} autoPlay controls></video>
+          <video ref={this.localVideo} width={320} height={240} autoPlay controls muted></video>
           <p>{this.state.client_id}</p>
           <button className="btn btn-primary">Call</button>
         </div>
