@@ -58,9 +58,9 @@ class ApiController {
       const detail_ice_rem = this.filterEventByType(details_array, 'ice_rem');
       const detail_ice = detail_ice_loc.concat(detail_ice_rem);
   
-      this.socket.broadcastToAll('getice', detail_ice);
       this.socket.broadcastToAll('getoffer', detail_offer);
       this.socket.broadcastToAll('getanswer', detail_answer);
+      this.socket.broadcastToAll('getice', detail_ice)
     } catch (e) {
       this.socket.broadcastToAll('error', { type:'heartbeat', e: e.toString()});
     }

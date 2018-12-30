@@ -19,18 +19,55 @@
 
 
 const cluster = require('cluster')
+const https = require('https')
 const { Ignitor } = require('@adonisjs/ignitor')
+const pem = require('pem')
 
-if (cluster.isMaster) {
-  for (let i=0; i < 4; i ++) {
-    cluster.fork()
+pem.createCertificate({ days: 2, selfSigned: true }, (error, keys) => {
+  if (error) {
+    return console.log(error)
   }
-  require('@adonisjs/websocket/clusterPubSub')()
-  return
-}
 
-new Ignitor(require('@adonisjs/fold'))
-  .appRoot(__dirname)
-  .wsServer()
-  .fireHttpServer()
-  .catch(console.error)
+  const options = {
+    key: keys.serviceKey,
+    cert: keys.certificate
+  };
+
+  if (cluster.isMaster) {
+    for (let i=0; i < 4; i ++) {
+      cluster.fork()
+    }
+    require('@adonisjs/websocket/clusterPubSub')()
+    return
+  }
+  
+  new Ignitor(require('@adonisjs/fold'))
+    .appRoot(__dirname)
+    .wsServer()
+    .fireHttpServer(handler => {
+      return https.createServer(options, handler)
+    })
+    .catch(console.error)
+})
+
+// const fs = require('fs')
+// const options = {
+//   key: fs.readFileSync(path.join(__dirname, './server.key')),
+//   cert: fs.readFileSync(path.join(__dirname, './server.crt'))
+// }
+
+// if (cluster.isMaster) {
+//   for (let i=0; i < 4; i ++) {
+//     cluster.fork()
+//   }
+//   require('@adonisjs/websocket/clusterPubSub')()
+//   return
+// }
+
+// new Ignitor(require('@adonisjs/fold'))
+//   .appRoot(__dirname)
+//   .wsServer()
+//   .fireHttpServer(handler => {
+//     return https.createServer(options, handler)
+//   })
+//   .catch(console.error)

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import adapter from 'webrtc-adapter';
 import Ws from '@adonisjs/websocket-client'
+import { isNullOrUndefined } from 'util';
 
 export default class ChatApp extends Component {
   constructor(props) {
@@ -19,6 +20,8 @@ export default class ChatApp extends Component {
     this.rtc = null;
     this.rtc_offers = [];
     this.rtc_ice = [];
+    this.is_adding_ice_loc = false;
+    this.is_adding_ice_rem = false;
     this.is_get_offer = false;
     this.is_get_answer = false;
     this.heartbeat_id = null;
@@ -51,8 +54,8 @@ export default class ChatApp extends Component {
         sdp
       };
 
-      this.is_get_answer = true;
       this.localPeerConnection.setRemoteDescription(answer);
+      this.is_get_answer = true;
       //ready for communicate
       console.log('answer', answer);
     }
@@ -70,9 +73,9 @@ export default class ChatApp extends Component {
         sdp: sdp
       };
 
-      this.is_get_offer = true;
       this.remotePeerConnection.setRemoteDescription(offer);
       this.setAnswer()
+      this.is_get_offer = true;
       //get offer
       console.log('offer', offer);
     }
@@ -85,14 +88,12 @@ export default class ChatApp extends Component {
 
       this.setIceLocal(ice_for_local);
       this.setIceRemote(ice_for_remote);
-      console.log('ice_remote', ice_for_remote);
-      console.log('ice_local', ice_for_local);
     }
   }
 
   getWS = () => {
     const host = location.host;
-    const fullpath = 'ws://' + host;
+    const fullpath = 'wss://' + host;
     const ws = Ws(fullpath);
     ws.connect();
 
@@ -180,8 +181,7 @@ export default class ChatApp extends Component {
     };
 
     try {
-      // eslint-disable-next-line no-unused-vars
-      const ignore = await this.localPeerConnection.setLocalDescription(offer);
+      await this.localPeerConnection.setLocalDescription(offer);
 
       this.sendSocket(offer, 'offer');
     } catch (e) {
@@ -190,15 +190,53 @@ export default class ChatApp extends Component {
   }
 
   setIceLocal = async (data) => {
-    data.forEach(item => {
-      //await this.localPeerConnection.addIceCandidate(event.candidate);
-    })
+    if (this.is_adding_ice_loc || !this.is_get_answer) return;
+    
+    this.is_adding_ice_loc = true;
+
+    for (var i = 0; i < data.length; i++) {
+      const item = data[i];
+      const result = this.rtc_ice.find((value) => value == item.id)
+
+      if (isNullOrUndefined(result)) {
+        try {
+          const candidate = JSON.parse(item.sdp);
+          const candidate_ice = new RTCIceCandidate(candidate);
+
+          await this.localPeerConnection.addIceCandidate(candidate_ice);
+          this.rtc_ice.push(item.id);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    this.is_adding_ice_loc = false;
   }
 
   setIceRemote = async (data) => {
-    data.forEach(item => {
-      //await this.remotePeerConnection.addIceCandidate();
-    })
+    if (this.is_adding_ice_rem || !this.is_get_offer) return;
+    
+    this.is_adding_ice_rem = true;
+
+    for (var i = 0; i < data.length; i++) {
+      const item = data[i];
+      const result = this.rtc_ice.find((value) => value == item.id)
+
+      if (isNullOrUndefined(result)) {
+        try {
+          const candidate = JSON.parse(item.sdp);
+          const candidate_ice = new RTCIceCandidate(candidate);
+
+          await this.remotePeerConnection.addIceCandidate(candidate_ice);
+          this.rtc_ice.push(item.id);
+        } catch (e) {
+          console.error(e)
+        }
+      }
+    }
+
+    this.is_adding_ice_rem = false;
   }
 
   sendSocket = (data, event) => {
@@ -280,6 +318,7 @@ export default class ChatApp extends Component {
   onIceCandidateRemote = async(event) => {
     try {
       if (event.candidate !== null) {
+        //await this.localPeerConnection.addIceCandidate(event.candidate);
         this.sendIceCandidate(event.candidate.toJSON(), 'ice_loc');
       }
     } catch (e) {
@@ -290,6 +329,7 @@ export default class ChatApp extends Component {
   onIceCandidateLocal = async (event) => {
     try {
       if (event.candidate !== null) {
+        //await this.remotePeerConnection.addIceCandidate(event.candidate);
         this.sendIceCandidate(event.candidate.toJSON(), 'ice_rem');
       }
     } catch (e) {
