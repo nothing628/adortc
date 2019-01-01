@@ -1,5 +1,8 @@
-.navbar-laravel {
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+.loginscreen.middle-box {
+  width: 350px;
 }
 
+.logo-name {
+  text-align: center;
+  font-size: 100px;
+}

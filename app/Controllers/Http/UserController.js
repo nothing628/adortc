@@ -1,11 +1,21 @@
 'use strict'
 
 class UserController {
-  async login ({ request, auth }) {
+  async loginPost ({ request, response, auth }) {
     const { email, password } = request.all()
-    await auth.attempt(email, password)
 
-    return 'Logged in successfully'
+    try {
+      await auth.attempt(email, password)
+    } catch (e) {
+      console.log(e)
+      return response.route('login')
+    }
+
+    return response.route('home')
+  }
+
+  login({ view }) {
+    return view.render('login')
   }
 
   show ({ auth, params }) {

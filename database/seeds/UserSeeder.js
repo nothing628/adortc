@@ -11,8 +11,6 @@
 */
 
 /** @type {import('@adonisjs/lucid/src/Factory')} */
-const Factory = use('Factory')
-const Hash = use('Hash')
 const User = use('App/Models/User')
 
 class UserSeeder {
@@ -32,14 +30,15 @@ class UserSeeder {
       'Rifqy Arisa',
     ];
 
-    names.forEach(async (name) => {
+    for (let i = 0; i<names.length; i++) {
+      const name = names[i];
       let cleanName = name.replace(' ', '');
       let newEmployer = new User;
       newEmployer.username = name;
-      newEmployer.password = await Hash.make('test1234');
+      newEmployer.password = 'test1234';
       newEmployer.email = cleanName + '@gmail.com';
       newEmployer.save();
-    });
+    }
   }
 }
 

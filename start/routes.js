@@ -16,17 +16,18 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.on('/').render('welcome').as('home')
 Route.get('/room', 'RtcController.index').as('room.list')
 Route.get('/room/:id', 'JoinController.index').as('room.join')
 Route.get('/api/room', 'RtcController.listRoom').as('api.room.list')
 Route.post('/api/room', 'RtcController.addRoom').as('api.room.add')
 Route.delete('/api/room/:id', 'RtcController.deleteRoom').as('api.room.delete')
 
-Route
-  .get('users/:id', 'UserController.show')
-  .middleware('auth')
+Route.get('/', 'HomeController.index').middleware('auth').as('home')
 
+Route.get('logout', 'UserController.logout')
+  .middleware('auth').as('logout')
+Route.get('login', 'UserController.login')
+  .middleware('guest').as('login')
 Route
-  .post('login', 'UserController.login')
+  .post('login', 'UserController.loginPost')
   .middleware('guest')
