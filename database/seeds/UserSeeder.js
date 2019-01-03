@@ -16,6 +16,7 @@ const User = use('App/Models/User')
 class UserSeeder {
   async run () {
     let names = [
+      'Administrator',
       'Rizky Ihatrayudha',
       'Faradhia Seviana',
       'Risma Widyasmoro',
@@ -37,6 +38,7 @@ class UserSeeder {
       newEmployer.username = name;
       newEmployer.password = 'test1234';
       newEmployer.email = cleanName + '@gmail.com';
+      newEmployer.is_admin = i == 0
       newEmployer.save();
     }
   }
