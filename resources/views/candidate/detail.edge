@@ -1,0 +1,145 @@
+@layout('layouts.admin')
+
+@section('title')
+InView+ | Candidate Detail
+@endsection
+
+@section('content')
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-lg-10">
+    <h2>Candidate Profile</h2>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a>Home</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a>Candidate</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <strong>Profile</strong>
+      </li>
+    </ol>
+  </div>
+  <div class="col-lg-2"></div>
+</div>
+<div class="wrapper wrapper-content">
+  <div class="row animated fadeInRight">
+    <div class="col-md-4">
+      <div class="ibox ">
+        <div class="ibox-title">
+          <h5>Profile Detail</h5>
+        </div>
+        <div>
+          <div class="ibox-content no-padding border-left-right">
+            <img alt="image" class="img-fluid" src="{{ assetsUrl('img/profile.png')}}">
+          </div>
+          <div class="ibox-content profile-content">
+            <h4><strong>Monica Smith</strong></h4>
+            <p><i class="fa fa-map-marker"></i> Riviera State 32/106</p>
+            <p><i class="fa fa-birthday-cake"></i> 11/11/1997</p>
+            <h5>
+              About me
+            </h5>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitat.
+            </p>
+            <div class="user-button">
+              <div class="row">
+                <div class="col-md-6">
+                  <button type="button" class="btn btn-primary btn-sm btn-block"><i class="fa fa-phone"></i> Call Interview</button>
+                </div>
+                <div class="col-md-6">
+                  <button type="button" class="btn btn-warning btn-sm btn-block"><i class="fa fa-eye"></i> Interview Status</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="ibox ">
+        <div class="ibox-title">
+          <h5>Schedule</h5>
+          <div class="ibox-tools">
+            <a class="collapse-link">
+              <i class="fa fa-chevron-up"></i>
+            </a>
+            <a class="close-link">
+              <i class="fa fa-times"></i>
+            </a>
+          </div>
+        </div>
+        <div class="ibox-content">
+          <button class="btn btn-primary btn-block m-t">
+            <i class="fa fa-calendar"></i> Reschedule</button>
+        </div>
+        <div class="ibox-content inspinia-timeline">
+            <div class="timeline-item">
+              <div class="row">
+                <div class="col-4 date">
+                  <i class="fa fa-briefcase"></i>
+                  17 Jan at 6:00 am
+                  <br>
+                  <small class="text-navy">2 hour ago</small>
+                </div>
+                <div class="col content no-top-border">
+                  <p class="m-b-xs"><strong>Request reschedule</strong></p>
+                  <p>Message : I need to reschedule our interview to 25 Jan</p>
+                </div>
+              </div>
+            </div>
+          <div class="timeline-item">
+            <div class="row">
+              <div class="col-4 date">
+                <i class="fa fa-briefcase"></i>
+                16 Jan at 6:00 am
+                <br>
+                <small class="text-navy">2 hour ago</small>
+              </div>
+              <div class="col content no-top-border">
+                <p class="m-b-xs"><strong>Initial schedule</strong></p>
+                <p>Note : For the candidate who have some point to.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ibox ">
+        <div class="ibox-title">
+          <h5>Files &AMP; Document</h5>
+          <div class="ibox-tools">
+            <a class="collapse-link">
+              <i class="fa fa-chevron-up"></i>
+            </a>
+            <a class="close-link">
+              <i class="fa fa-times"></i>
+            </a>
+          </div>
+        </div>
+        <div class="ibox-content">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Document Title</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>CV.pdf</td>
+                <td>
+                  <a href="javascript:;">View</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+@endsection
