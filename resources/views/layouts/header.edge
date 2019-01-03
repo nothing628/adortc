@@ -3,12 +3,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <title>InView+ | Dashboard</title>
+  <title>
+    @section('title')
+    InView+
+    @endsection
+  </title>
 
   {{ style('css/bootstrap.min.css') }}
   {{ style('css/font-awesome.min.css') }}
   {{ style('plugins/toastr/toastr.min.css') }}
   {{ style('plugins/gritter/css/jquery.gritter.css') }}
+
+  @section('styles')  
+  @endsection
 
   {{ style('css/animate.css') }}
   {{ style('css/style.css') }}
