@@ -1,9 +1,41 @@
 @layout('layouts.admin')
 
 @section('title')
-InView+ | Dashboard
+SmartExam | Dashboard
 @endsection
 
 @section('content')
-  Ini Content
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-lg-10">
+    <h2>Dashboard</h2>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item active">
+        <strong>Home</strong>
+      </li>
+    </ol>
+  </div>
+  <div class="col-lg-2"></div>
+</div>
+<div class="wrapper wrapper-content">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5>Activity for today</h5>
+          <div class="ibox-tools">
+            <a class="collapse-link">
+              <i class="fa fa-chevron-up"></i>
+            </a>
+            <a class="close-link">
+              <i class="fa fa-times"></i>
+            </a>
+          </div>
+        </div>
+        <div class="ibox-content">
+          Content
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection

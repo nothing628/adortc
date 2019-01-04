@@ -5,6 +5,8 @@
 .logo-name {
   text-align: center;
   font-size: 100px;
+  transform: translateX(-80px);
+  width: 510px;
 }
 
 .video-box,
