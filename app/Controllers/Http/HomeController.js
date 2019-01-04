@@ -1,8 +1,12 @@
 'use strict'
 
 class HomeController {
-  index({ view }) {
-    return view.render('home')
+  index({ view, auth }) {
+    if (auth.user.is_admin) {
+      return view.render('home')
+    }
+
+    return view.render('homeclient')
   }
 }
 

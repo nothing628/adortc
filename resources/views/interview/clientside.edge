@@ -1,0 +1,56 @@
+@layout('layouts.admin')
+
+@section('title')
+InView+ | Interview session
+@endsection
+
+@section('content')
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-lg-10">
+    <h2>Interview Session</h2>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a>Home</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <strong>Interview</strong>
+      </li>
+    </ol>
+  </div>
+  <div class="col-lg-2"></div>
+</div>
+<div class="wrapper wrapper-content">
+  <div class="row animated fadeInRight">
+    <div class="col-md-12 col-lg-5">
+      <div class="ibox ">
+        <div class="ibox-title">
+          <h5>Interview Session</h5>
+        </div>
+        <div class="ibox-content">
+          <div class="video-box">
+            <div class="video">
+              <div class="overlay">
+                <div class="container-img">
+                  <img src="{{ assetsUrl('img/profile.png')}}" class="img-fluid"/>
+                </div>
+              </div>
+              <img src="{{ assetsUrl('img/profile.png')}}" class="img-fluid img-self"/>
+            </div>
+            <div class="video-button btn-group">
+              <button class="btn btn-primary">
+                <i class="fa fa-phone"></i> Hung Up
+              </button>
+              <button class="btn btn-warning">
+                <i class="fa fa-microphone-slash"></i> Off
+              </button>
+              <button class="btn btn-danger">
+                <i class="fa fa-phone"></i> Calling
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+@endsection

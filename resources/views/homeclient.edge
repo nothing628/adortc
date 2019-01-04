@@ -1,0 +1,34 @@
+@layout('layouts.admin')
+
+@section('title')
+InView+ | Dashboard
+@endsection
+
+@section('content')
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-lg-10">
+    <h2>Dashboard</h2>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item active">
+        <strong>Home</strong>
+      </li>
+    </ol>
+  </div>
+  <div class="col-lg-2"></div>
+</div>
+<div class="wrapper wrapper-content">
+  <div class="middle-box text-center animated fadeInRightBig" style="margin-top:10px;max-width:500px;">
+    <h2 class="font-bold">Hi, {{ auth.user.username}}</h2>
+    <div class="error-desc">
+      We already schedule your interview on 18 Jan 2019 19:00 pm, here what
+      the interviewer note to you :<br>
+      <p>We need you to use some ... </p>
+    </div>
+    <div class="error-desc">
+      If you want to reschedule your interview, please let us know
+      <br><a href="index.html" class="btn btn-primary m-t">Reschedule</a>
+      <a href="index.html" class="btn btn-danger m-t">Cancel</a>
+    </div>
+  </div>
+</div>
+@endsection

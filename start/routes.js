@@ -39,8 +39,7 @@ Route.group(() => {
 
 Route.group(() => {
   Route.get('result/:id', 'InterviewController.result').as('interview.result')
-  Route.get('client', 'InterviewController.clientside').as('interview.client')
-  Route.get('admin', 'InterviewController.adminside').as('interview.admin')
+  Route.get('/', 'InterviewController.interview').as('interview.index')
   Route.post('result', 'InterviewController.updateResult').as('interview.result.post')
 }).prefix('interview').middleware('auth')
 

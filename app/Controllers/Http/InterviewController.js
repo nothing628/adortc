@@ -1,11 +1,11 @@
 'use strict'
 
 class InterviewController {
-  adminside({ request, view }) {
-    return view.render('interview.adminside')
-  }
+  interview({ request, view, auth }) {
+    if (auth.user.is_admin) {
+      return view.render('interview.adminside')
+    }
 
-  clientside({ request, view }) {
     return view.render('interview.clientside')
   }
 
