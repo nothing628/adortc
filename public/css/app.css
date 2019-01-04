@@ -28,6 +28,11 @@
   left: 0;
   right: 0;
   bottom: 0;
+  /* background-image: url(http://127.0.0.1:3333/img/another.jpg); */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #333;
 }
 
 .video-box .video .overlay .img-fluid {

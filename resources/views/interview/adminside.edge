@@ -4,6 +4,88 @@
 InView+ | Interview session
 @endsection
 
+@section('styles')
+{{ style('plugins/bootstrap-markdown/css/bootstrap-markdown.min.css') }}
+@endsection
+
+@section('scripts')
+{{ script('js/pdf.js')}}
+{{ script('plugins/bootstrap-markdown/js/bootstrap-markdown.js')}}
+<script>
+  $(document).ready(function() {
+    var url = '{{ assetsUrl('storage/4.pdf') }}';
+    var pdfjsLib = window.pdfjsLib;
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '{{ assetsUrl('js/pdf.worker.js') }}';
+
+    var pdfDoc = null,
+        pageNum = 1,
+        pageRendering = false,
+        pageNumPending = null,
+        scale = 0.8,
+        canvas = document.getElementById('the-canvas'),
+        ctx = canvas.getContext('2d');
+
+    function renderPage(num) {
+      pageRendering = true;
+      // Using promise to fetch the page
+      pdfDoc.getPage(num).then(function(page) {
+        var viewport = page.getViewport(scale);
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        // Render PDF page into canvas context
+        var renderContext = {
+          canvasContext: ctx,
+          viewport: viewport
+        };
+        var renderTask = page.render(renderContext);
+
+        // Wait for rendering to finish
+        renderTask.promise.then(function() {
+          pageRendering = false;
+          if (pageNumPending !== null) {
+            // New page rendering is pending
+            renderPage(pageNumPending);
+            pageNumPending = null;
+          }
+        });
+      });
+    }
+
+    function queueRenderPage(num) {
+      if (pageRendering) {
+        pageNumPending = num;
+      } else {
+        renderPage(num);
+      }
+    }
+
+    function onPrevPage() {
+      if (pageNum <= 1) {
+        return;
+      }
+      pageNum--;
+      queueRenderPage(pageNum);
+    }
+
+    function onNextPage() {
+      if (pageNum >= pdfDoc.numPages) {
+        return;
+      }
+      pageNum++;
+      queueRenderPage(pageNum);
+    }
+
+    pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+      pdfDoc = pdfDoc_;
+      
+      renderPage(pageNum);
+    });
+  })
+</script>
+@endsection
+
 @section('content')
 <div class="row wrapper border-bottom white-bg page-heading">
   <div class="col-lg-10">
@@ -22,30 +104,44 @@ InView+ | Interview session
 <div class="wrapper wrapper-content">
   <div class="row">
     <div class="col-md-12 col-lg-5">
-      <div class="ibox ">
-        <div class="ibox-title">
-          <h5>Interview Session</h5>
-        </div>
-        <div class="ibox-content">
-          <div class="video-box">
-            <div class="video">
-              <div class="overlay">
-                <div class="container-img">
-                  <img src="{{ assetsUrl('img/profile.png')}}" class="img-fluid"/>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="ibox ">
+            <div class="ibox-title">
+              <h5>Interview Session</h5>
+            </div>
+            <div class="ibox-content">
+              <div class="video-box">
+                <div class="video">
+                  <div class="overlay">
+                    <div class="container-img">
+                      <img src="{{ assetsUrl('img/profile.png')}}" class="img-fluid"/>
+                    </div>
+                  </div>
+                  <img src="{{ assetsUrl('img/another.jpg')}}" class="img-fluid img-self"/>
+                </div>
+                <div class="video-button btn-group">
+                  <button class="btn btn-primary">
+                    <i class="fa fa-phone"></i> Hung Up
+                  </button>
+                  <button class="btn btn-warning">
+                    <i class="fa fa-microphone-slash"></i> Off
+                  </button>
+                  <button class="btn btn-danger">
+                    <i class="fa fa-phone"></i> Calling
+                  </button>
                 </div>
               </div>
-              <img src="{{ assetsUrl('img/profile.png')}}" class="img-fluid img-self"/>
             </div>
-            <div class="video-button btn-group">
-              <button class="btn btn-primary">
-                <i class="fa fa-phone"></i> Hung Up
-              </button>
-              <button class="btn btn-warning">
-                <i class="fa fa-microphone-slash"></i> Off
-              </button>
-              <button class="btn btn-danger">
-                <i class="fa fa-phone"></i> Calling
-              </button>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="ibox ">
+            <div class="ibox-title">
+              <h5>Notes</h5>
+            </div>
+            <div class="ibox-content">
+              <textarea name="content" data-provide="markdown" rows="10"></textarea>
             </div>
           </div>
         </div>
@@ -57,6 +153,20 @@ InView+ | Interview session
           <h5>Files &AMP; Documents</h5>
         </div>
         <div class="ibox-content">
+          <div class="btn-group btn-block">
+            <button class="btn btn-primary">Prev</button>
+            <div class="btn btn-default">1/1</div>
+            <button class="btn btn-primary">Next</button>
+            <button class="btn btn-warning">
+              <i class="fa fa-search-minus"></i>
+            </button>
+            <button class="btn btn-warning">
+              <i class="fa fa-search-plus"></i>
+            </button>
+          </div>
+          <div class="view">
+            <canvas id="the-canvas"></canvas>
+          </div>
         </div>
       </div>
     </div>

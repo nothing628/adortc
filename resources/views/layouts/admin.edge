@@ -2,28 +2,31 @@
 <html>
 @include('layouts.header')
 <body>
-    <div id="wrapper">
-        @include('layouts.left_sidebar')
-        <div id="page-wrapper" class="gray-bg dashbard-1">
-            @include('layouts.navbar_top')
-            @!section('content')
-            @include('layouts.footer')
-        </div>
-        {{--  @include('layouts.small_chat')  --}}
-        {{--  @include('layouts.right_sidebar')  --}}
+  <div id="wrapper">
+    @include('layouts.left_sidebar')
+    <div id="page-wrapper" class="gray-bg dashbard-1">
+      @include('layouts.navbar_top')
+      @!section('content')
+      @include('layouts.footer')
     </div>
+    {{--  @include('layouts.small_chat')  --}}
+    {{--  @include('layouts.right_sidebar')  --}}
+  </div>
 
-    <!-- Mainly scripts -->
-    {{ script('js/jquery-3.3.1.min.js') }}
-    {{ script('js/bootstrap.bundle.min.js') }}
-    {{ script('plugins/metismenu/dist/metisMenu.min.js')}}
-    {{ script('plugins/slimscroll/jquery.slimscroll.min.js')}}
-    
-    <!-- Custom and plugin javascript -->
-    {{ script('js/inspinia.js')}}
-    {{ script('js/pace.min.js')}}
-    {{ script('plugins/jqueryui/jquery-ui.min.js')}}
-    {{ script('plugins/gritter/js/jquery.gritter.min.js')}}
-    {{ script('plugins/toastr/toastr.min.js')}}
+  <!-- Mainly scripts -->
+  {{ script('js/jquery-3.3.1.min.js') }}
+  {{ script('js/bootstrap.bundle.min.js') }}
+  {{ script('plugins/metismenu/dist/metisMenu.min.js')}}
+  {{ script('plugins/slimscroll/jquery.slimscroll.min.js')}}
+  
+  <!-- Custom and plugin javascript -->
+  {{ script('js/inspinia.js')}}
+  {{ script('js/pace.min.js')}}
+  {{ script('plugins/jqueryui/jquery-ui.min.js')}}
+  {{ script('plugins/gritter/js/jquery.gritter.min.js')}}
+  {{ script('plugins/toastr/toastr.min.js')}}
+
+  @section('scripts')
+  @endsection
 </body>
 </html>
